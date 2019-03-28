@@ -1,18 +1,20 @@
 #include "Automata.h"
 #include <string>
-
 using namespace std;
 
-string Automata::on() {
-	State = WAIT;
-	cout << "Machine is working\n";
-	return "ON";
+STATES Automata::on() {
+	if (State == OFF)
+	{
+		State = WAIT;
+		return State;
+	}
+	else return State;
 }
 
 
-string Automata::off()
+STATES Automata::off()
 {
-	if (State != OFF) //ĺńëč óćĺ âűęëţ÷ĺí, ňî íĺ âűęëţ÷ŕĺě ĺůĺ đŕç 
+	if (State != OFF || State != COOK) //если уже выключен, то не выключаем еще раз 
 	{
 		if (cash != 0)
 		{
@@ -22,72 +24,64 @@ string Automata::off()
 		State = OFF;
 		ch = 0;
 		cout << "Turning off the machine..\n";
-		return "OFF";
+		return State;
 	}
+
+	return State;
 }
 
-int Automata::getCash()
-{
-	return cash;
-}
-
-void Automata::coin(int a) {
+STATES Automata::coin(int a) {
 	switch (State) {
 
 	case (WAIT):
 		State = ACCEPT;
 		cash = a;
 		cout << "Balance: " << cash << endl;
-		break;
+		return State;
 
 	case (OFF):
 		State = ACCEPT;
 		cash = a;
 		cout << "Balance: " << cash << endl;
-		break;
+		return State;
 
 	case (ACCEPT):
 		cash = cash + a;
 		cout << "Balance: " << cash << endl;
-		break;
+		return State;
 
 	case (CHECK):
 		cash = cash + a;
 		cout << "Balance: " << cash << endl;
 		State = CHECK;
 		choice(ch);
-		break;
+		return State;
 
 	default:
-		break;
+		return State;
 	}
 }
 
-void Automata::choice(int a) {
+STATES Automata::choice(int a) {
 	switch (State) {
 	case(ACCEPT):
 		ch = a - 1;
 		State = CHECK;
-		//break;
-
+		
 	case(CHECK):
 		if (cash < prices[ch])
 		{
 			cout << "\nNot enough money..\n";
 		}
-		else {
-			cout << "Everything is allright\n";
-			cook();
-		}
-		break;
+		else cook();
+		return State;
 
 	default:
-		break;
+		return State;
 	}
 }
 
 void Automata::printMenu() {
-	using namespace std;
 	int size = sizeof(prices) / sizeof(int);
 	for (int i = 0; i < size; i++)
 		cout << menu[i] << " - " << prices[i] << endl;
@@ -96,6 +90,7 @@ void Automata::printMenu() {
 void Automata::printState()
 {
 	switch (State) {
+
 	case(WAIT):
 		cout << "WAITING...\n";
 	case (OFF):
@@ -110,38 +105,41 @@ void Automata::printState()
 	}
 }
 
-void Automata::cancel() {
+STATES Automata::cancel() {
 	switch (State)
 	{
 	case (OFF):
 		cout << "Machine is off, can not cancel\n";
-		break;
+		return State;
 	case (COOK):
 		cout << "Can not cancel, wait until drink will be cooked\n";
 	case (WAIT):
-		break;
+		return State;
 	default:
 		State = WAIT;
 		cout << "Your change: " << cash << endl;
 		cash = 0;
 		ch = 0;
+		return State;
 	}
 }
 
-void Automata::cook()
+STATES Automata::cook()
 {
 	State = COOK;
 	cout << menu[ch] << endl;
 	printState();
 	finish();
+	return State;
 }
 
-void Automata::finish() {
+STATES Automata::finish() {
 	State = WAIT;
 	cout << "Your change: " << cash - prices[ch] << endl;
-	cash = cash - prices[ch];
+	cash = 0;
 	ch = 0;
 	cout << "Thank you, have a good day! \n";
+	return State;
 }
 
 Automata::Automata() {
