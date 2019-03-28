@@ -9,6 +9,5 @@ int main()
 	a.coin(23);
 	a.choice(3);
 	a.coin(10);
-	cout << a.getCash() << " ANS";
 	getchar();
 }
